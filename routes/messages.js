@@ -1,3 +1,11 @@
+const express = require('express');
+const User = require('../models/user');
+const Message = require('../models/message');
+const db = require('../db');
+const { ensureCorrectUser, ensureLoggedIn } = require('../middleware/auth');
+
+const router = express.Router();
+
 /** GET /:id - get detail of message.
  *
  * => {message: {id,
@@ -11,6 +19,23 @@
  *
  **/
 
+router.get('/:id', ensureLoggedIn, async function(req, res, next) {
+  try {
+    let { id } = req.params;
+
+    if (
+      (await Message.isFrom(id, req.username)) ||
+      (await Message.isTo(id, req.username))
+    ) {
+      let result = await Message.get(id);
+      return res.json(result);
+    } else {
+      throw new Error('Not authorized');
+    }
+  } catch (err) {
+    next(err);
+  }
+});
 
 /** POST / - post message.
  *
@@ -19,6 +44,21 @@
  *
  **/
 
+router.post('/', ensureLoggedIn, async function(req, res, next) {
+  try {
+    let from_username = req.username;
+    let { to_username, body } = req.body;
+
+    // create object of message data
+    let data = { from_username, to_username, body };
+
+    // create message
+    let message = await Message.create(data);
+    return res.json({ message });
+  } catch (err) {
+    next(err);
+  }
+});
 
 /** POST/:id/read - mark message as read:
  *
@@ -28,3 +68,20 @@
  *
  **/
 
+router.post('/:id/read', ensureLoggedIn, async function(req, res, next) {
+  try {
+    let { id } = req.params;
+
+    // ensure user is authorized to mark message
+    if (await Message.isTo(id, req.username)) {
+      let message = await Message.markRead(id);
+      return res.json({ message });
+    } else {
+      throw new Error('Not authorized');
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+module.exports = router;

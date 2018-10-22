@@ -1,5 +1,7 @@
 const express = require('express');
-const { User } = require('./user');
+const User = require('../models/user');
+const jwt = require('jsonwebtoken');
+const { SECRET_KEY } = require('../config');
 
 const router = express.Router();
 
@@ -8,6 +10,26 @@ const router = express.Router();
  * Make sure to update their last-login!
  *
  **/
+
+router.post('/login', async function(req, res, next) {
+  try {
+    let { username, password } = req.body;
+
+    if (User.authenticate(username, password)) {
+      // create JWT
+      let token = jwt.sign({ username }, SECRET_KEY, {
+        expiresIn: 60 * 60
+      });
+
+      // update last login time
+      User.updateLoginTimestamp(username);
+
+      return res.json(token);
+    }
+  } catch (err) {
+    next(err);
+  }
+});
 
 /** POST /register - register user: registers, logs in, and returns token.
  *
@@ -19,15 +41,25 @@ const router = express.Router();
 router.post('/register', async function(req, res, next) {
   try {
     let { username, password, first_name, last_name, phone } = req.body;
-    let user = User.register({
+
+    // register
+    let user = await User.register({
       username,
       password,
       first_name,
       last_name,
       phone
     });
-    console.log(user);
-    return res.json(user);
+
+    // create JWT
+    let token = jwt.sign({ username: user.username }, SECRET_KEY, {
+      expiresIn: 60 * 60
+    });
+
+    // update last login time
+    User.updateLoginTimestamp(user.username);
+
+    return res.json(token);
   } catch (err) {
     next(err);
   }
