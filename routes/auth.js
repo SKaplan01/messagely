@@ -14,8 +14,8 @@ const router = express.Router();
 router.post('/login', async function(req, res, next) {
   try {
     let { username, password } = req.body;
-
-    if (User.authenticate(username, password)) {
+    
+    if (await User.authenticate(username, password)) {
       // create JWT
       let token = jwt.sign({ username }, SECRET_KEY, {
         expiresIn: 60 * 60
@@ -25,6 +25,10 @@ router.post('/login', async function(req, res, next) {
       User.updateLoginTimestamp(username);
 
       return res.json(token);
+    } else {
+      let err = new Error("Not Found");
+      err.status = 404;
+      throw err;
     }
   } catch (err) {
     next(err);
