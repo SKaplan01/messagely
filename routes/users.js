@@ -84,7 +84,7 @@ router.get('/:username/from', ensureCorrectUser, async function(req,res,next) {
  *          phone }}       =>   {useranme}
  */
 
-router.post('/:username/edit', ensureCorrectUser, function(req, res, next) {
+router.post('/:username/edit', ensureCorrectUser, async function(req, res, next) {
   try {
     let currentUser = req.params.username;
 
@@ -93,7 +93,7 @@ router.post('/:username/edit', ensureCorrectUser, function(req, res, next) {
       last_name: req.body.last_name, 
       phone: req.body.phone };
 
-    let message = User.updateUserInfo(currentUser, newInfo);
+    let message = await User.updateUserInfo(currentUser, newInfo);
     return res.json(message);
   } catch (err) {
     next(err);
