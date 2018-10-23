@@ -1,6 +1,5 @@
 /** Message class for message.ly */
 const db = require('../db');
-
 /** Message on the site. */
 
 class Message {
@@ -67,6 +66,32 @@ class Message {
   static async isFrom(id, username) {
     let { from_username } = await Message.getUsersFromMessage(id);
     return from_username === username;
+  }
+
+  static async getSMSData(id) {
+    // create message in database if new message
+    // but currently this function only gets data for existing message
+
+    let result = await db.query(
+      `
+      SELECT body, to_username, phone AS from
+      FROM messages 
+      JOIN users on from_username=username 
+      WHERE messages.id=$1`,
+      [id]
+    );
+
+    let { body, from, to_username } = result.rows[0];
+
+    let to_phone = await db.query(
+      `SELECT phone AS to FROM users 
+      WHERE username=$1`,
+      [to_username]
+    );
+
+    let { to } = to_phone.rows[0];
+
+    return { body, from, to };
   }
 }
 

@@ -11,5 +11,7 @@ const TWILIO_SID = process.env.TWILIO_SID;
 
 module.exports = {
   SECRET_KEY,
-  BCRYPT_WORK_ROUNDS
+  BCRYPT_WORK_ROUNDS,
+  TWILIO_AUTH_TOKEN,
+  TWILIO_SID
 };

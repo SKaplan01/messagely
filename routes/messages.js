@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/user');
 const Message = require('../models/message');
 const db = require('../db');
+const sendSMS = require('../sendTwilio');
 const { ensureCorrectUser, ensureLoggedIn } = require('../middleware/auth');
 
 const router = express.Router();
@@ -76,6 +77,26 @@ router.post('/:id/read', ensureLoggedIn, async function(req, res, next) {
     if (await Message.isTo(id, req.username)) {
       let message = await Message.markRead(id);
       return res.json({ message });
+    } else {
+      throw new Error('Not authorized');
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/sms', ensureLoggedIn, async function(req, res, next) {
+  try {
+    // let { to, from } = req.body;
+    let { id } = req.params;
+
+    // ensure user is authorized to mark message
+    if (await Message.isFrom(id, req.username)) {
+      let { body, to, from } = await Message.getSMSData(id);
+
+      let smsResult = await sendSMS(body, to, from);
+
+      return res.json(smsResult);
     } else {
       throw new Error('Not authorized');
     }
