@@ -125,6 +125,40 @@ class User {
     );
     return results.rows;
   }
+
+  /** Update user information.
+   * 
+   * 
+   * Accepts a the currnet user's username,
+   * and an object with any or none of these parameters.
+   * 
+   * 
+   * 
+   * {username, [first_name, [last_name, [phone]]]} 
+   *  => updated {username, first_name, last_name, phone}
+   * 
+   */
+
+   static async updateUserInfo(username, newInfo) {
+     // make sure not to update the database with an undefined value
+
+    let results = await db.query(
+      `SELECT username, first_name, last_name, phone 
+      FROM users WHERE username=$1`, [username]
+    );
+
+    console.log(results.rows[0]);
+    return results.rows[0];
+
+
+
+    //  let result = await db.query(
+    //    `INSERT INTO users (username, first_name, last_name, phone)
+    //    VALUES ($1, $2, $3, $4)`,
+    //    [username, first_name, last_name, phone]
+    //  )
+
+   }
 }
 
 module.exports = User;
