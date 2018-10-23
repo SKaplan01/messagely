@@ -65,11 +65,7 @@ router.get('/:username/to', ensureCorrectUser, async function(req, res, next) {
  *
  **/
 
-router.get('/:username/from', ensureCorrectUser, async function(
-  req,
-  res,
-  next
-) {
+router.get('/:username/from', ensureCorrectUser, async function(req,res,next) {
   try {
     let { username } = req.params;
     let messages = await User.messagesFrom(username);
@@ -78,5 +74,32 @@ router.get('/:username/from', ensureCorrectUser, async function(
     next(err);
   }
 });
+
+
+/** POST /:username/edit - update username, first name, last name, or phone
+ * 
+ * {user : {username,
+ *          first_name,
+ *          last_name,
+ *          phone }}       =>   {useranme}
+ */
+
+router.get('/:username/edit', ensureCorrectUser, function(res, req, next) {
+  try {
+    let currentUser = req.params.username;
+
+    let newInfo = { username: req.params.username, 
+      first_name: req.params.first_name, 
+      last_name: req.params.last_name, 
+      phone: req.params.phone };
+    
+
+
+    let message = User.updateUserInfo(currentUser, newInfo);
+    console.log(message);
+  } catch (err) {
+    next(err);
+  }
+})
 
 module.exports = router;
