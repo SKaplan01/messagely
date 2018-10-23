@@ -84,15 +84,17 @@ router.get('/:username/from', ensureCorrectUser, async function(req,res,next) {
  *          phone }}       =>   {useranme}
  */
 
-router.get('/:username/edit', ensureCorrectUser, function(res, req, next) {
+router.post('/:username/edit', ensureCorrectUser, function(req, res, next) {
   try {
     let currentUser = req.params.username;
 
-    let newInfo = { username: req.params.username, 
-      first_name: req.params.first_name, 
-      last_name: req.params.last_name, 
-      phone: req.params.phone };
+    let newInfo = { username: req.body.username, 
+      first_name: req.body.first_name, 
+      last_name: req.body.last_name, 
+      phone: req.body.phone };
+
     let message = User.updateUserInfo(currentUser, newInfo);
+    return res.json(message);
   } catch (err) {
     next(err);
   }
