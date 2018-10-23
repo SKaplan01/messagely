@@ -15,7 +15,7 @@ router.post('/login', async function(req, res, next) {
   try {
     let { username, password } = req.body;
     
-    if (await User.authenticate(username, password)) {
+    if (await User.authenticate(username, password) === true) {
       // create JWT
       let token = jwt.sign({ username }, SECRET_KEY, {
         expiresIn: 60 * 60
