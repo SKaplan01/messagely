@@ -92,11 +92,7 @@ router.get('/:username/edit', ensureCorrectUser, function(res, req, next) {
       first_name: req.params.first_name, 
       last_name: req.params.last_name, 
       phone: req.params.phone };
-    
-
-
     let message = User.updateUserInfo(currentUser, newInfo);
-    console.log(message);
   } catch (err) {
     next(err);
   }
