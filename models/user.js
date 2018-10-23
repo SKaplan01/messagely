@@ -142,22 +142,30 @@ class User {
    static async updateUserInfo(username, newInfo) {
      // make sure not to update the database with an undefined value
 
-    let results = await db.query(
+    let selected = await db.query(
       `SELECT username, first_name, last_name, phone 
       FROM users WHERE username=$1`, [username]
     );
 
-    console.log(results.rows[0]);
-    return results.rows[0];
+    let userInfo = selected.rows[0];
 
+    for (let key in newInfo) {
+      userInfo[key] = newInfo[key] || userInfo[key];
+    }
 
+    let updated = await db.query(
+      `UPDATE users 
+      SET username=$1, first_name=$2, last_name=$3, phone=$4
+      WHERE username=$5
+      RETURNING username,first_name,last_name,phone`,
+      [userInfo.username, 
+      userInfo.first_name, 
+      userInfo.last_name, 
+      userInfo.phone, 
+      username]
+    );
 
-    //  let result = await db.query(
-    //    `INSERT INTO users (username, first_name, last_name, phone)
-    //    VALUES ($1, $2, $3, $4)`,
-    //    [username, first_name, last_name, phone]
-    //  )
-
+    return updated.rows[0];
    }
 }
 
